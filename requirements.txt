@@ -5,3 +5,4 @@ numpy
 seaborn
 matplotlib
 base58
+yfinance
