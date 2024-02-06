@@ -7,7 +7,7 @@ import numpy as np
 import yfinance as yf
 
 st.set_page_config(
-   page_title="Nifty500 App",
+   page_title="Nifty500",
    #page_icon="🧊",
    #page_icon="""st.image("nifty50.svg")""",
    page_icon=None,
