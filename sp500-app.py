@@ -6,31 +6,13 @@ import seaborn as sns
 import numpy as np
 import yfinance as yf
 
-st.title('Nifty 500 App')
+st.title('S&P 500 App')
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
-st.set_page_config(
-   page_title="Nifty500 App",
-   page_icon="🧊",
-   layout="wide",
-   initial_sidebar_state="expanded",
-)
-
-hide_st_style = """
-            <style>
-            #MainMenu {visibility: hidden;}
-            footer {visibility: hidden;}
-            header {visibility: hidden;}
-            </style>
-            """
-st.markdown(hide_st_style, unsafe_allow_html=True)
-
 st.markdown("""
-This app retrieves the list of the **nifty 500** (from Wikipedia) and its corresponding **stock closing price** (year-to-date)!
-- On the left hand side, by default all the sectors will be selected when you launch this app first time.
-- Second input feature is to show stock closing price.For this you can use slider to select number of companies & then click on **Show Plots** button.
+This app retrieves the list of the **S&P 500** (from Wikipedia) and its corresponding **stock closing price** (year-to-date)!
 * **Python libraries:** base64, pandas, streamlit, numpy, matplotlib, seaborn
-* **Data source:** [Wikipedia](https://en.wikipedia.org/wiki/NIFTY_500).
+* **Data source:** [Wikipedia](https://en.wikipedia.org/wiki/List_of_S%26P_500_companies).
 """)
 
 st.sidebar.header('User Input Features')
@@ -39,43 +21,39 @@ st.sidebar.header('User Input Features')
 #
 @st.cache_data
 def load_data():
-    url = 'https://en.wikipedia.org/wiki/NIFTY_500'
+    url = 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
     html = pd.read_html(url, header = 0)
-    df = html[2]
+    df = html[0]
     return df
 
 df = load_data()
-sector = df.groupby('Industry')
+sector = df.groupby('GICS Sector')
 
 # Sidebar - Sector selection
-sorted_sector_unique = sorted( df['Industry'].unique() )
+sorted_sector_unique = sorted( df['GICS Sector'].unique() )
 selected_sector = st.sidebar.multiselect('Sector', sorted_sector_unique, sorted_sector_unique)
 
 # Filtering data
-df_selected_sector = df[ (df['Industry'].isin(selected_sector)) ]
+df_selected_sector = df[ (df['GICS Sector'].isin(selected_sector)) ]
 
 st.header('Display Companies in Selected Sector')
 st.write('Data Dimension: ' + str(df_selected_sector.shape[0]) + ' rows and ' + str(df_selected_sector.shape[1]) + ' columns.')
 st.dataframe(df_selected_sector)
 
-# Download nifty500 data
+# Download S&P500 data
 # https://discuss.streamlit.io/t/how-to-download-file-in-streamlit/1806
 def filedownload(df):
     csv = df.to_csv(index=False)
     b64 = base64.b64encode(csv.encode()).decode()  # strings <-> bytes conversions
-    href = f'<a href="data:file/csv;base64,{b64}" download="nifty.csv">Download CSV File</a>'
+    href = f'<a href="data:file/csv;base64,{b64}" download="SP500.csv">Download CSV File</a>'
     return href
 
 st.markdown(filedownload(df_selected_sector), unsafe_allow_html=True)
 
 # https://pypi.org/project/yfinance/
 
-# Append ".NS" to each symbol
-symbols_with_suffix = [symbol + ".NS" for symbol in list(df_selected_sector[:10].Symbol)]
-
-
 data = yf.download(
-        tickers = symbols_with_suffix,
+        tickers = list(df_selected_sector[:10].Symbol),
         period = "ytd",
         interval = "1d",
         group_by = 'ticker',
@@ -86,8 +64,6 @@ data = yf.download(
     )
 
 # Plot Closing Price of Query Symbol
-
-
 def price_plot(symbol):
   df = pd.DataFrame(data[symbol].Close)
   df['Date'] = df.index
@@ -99,9 +75,9 @@ def price_plot(symbol):
   plt.ylabel('Closing Price', fontweight='bold')
   return st.pyplot()
 
-num_company = st.sidebar.slider('Number of Companies', 1, 10)
+num_company = st.sidebar.slider('Number of Companies', 1, 5)
 
 if st.button('Show Plots'):
     st.header('Stock Closing Price')
-    for symbol in symbols_with_suffix[:num_company]:
-        price_plot(symbol)  # Pass 'data' argument to price_plot function
+    for i in list(df_selected_sector.Symbol)[:num_company]:
+        price_plot(i)
