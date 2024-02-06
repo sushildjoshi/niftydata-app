@@ -6,9 +6,6 @@ import seaborn as sns
 import numpy as np
 import yfinance as yf
 
-st.title('Nifty 500 App')
-st.set_option('deprecation.showPyplotGlobalUse', False)
-
 st.set_page_config(
    page_title="Ex-stream-ly Cool App",
    page_icon="🧊",
@@ -16,6 +13,11 @@ st.set_page_config(
    initial_sidebar_state="expanded",
    menu_items=None
 )
+
+st.title('Nifty 500 App')
+st.set_option('deprecation.showPyplotGlobalUse', False)
+
+
 
 hide_st_style = """
             <style>
