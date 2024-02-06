@@ -8,7 +8,8 @@ import yfinance as yf
 
 st.set_page_config(
    page_title="Nifty500 App",
-   page_icon="🧊",
+   #page_icon="🧊",
+   page_icon="""st.image("nifty50.svg")""",
    layout="wide",
    initial_sidebar_state="expanded",
    menu_items=None
