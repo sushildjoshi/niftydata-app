@@ -9,12 +9,7 @@ import yfinance as yf
 st.title('Nifty 500 App')
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
-st.set_page_config(
-   page_title="Nifty500 App",
-   page_icon="🧊",
-   layout="wide",
-   initial_sidebar_state="expanded",
-)
+
 
 hide_st_style = """
             <style>
