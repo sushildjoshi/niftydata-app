@@ -7,7 +7,7 @@ import numpy as np
 import yfinance as yf
 
 st.set_page_config(
-   page_title="Ex-stream-ly Cool App",
+   page_title="Nifty500 App",
    page_icon="🧊",
    layout="wide",
    initial_sidebar_state="expanded",
