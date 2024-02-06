@@ -22,7 +22,7 @@ st.set_option('deprecation.showPyplotGlobalUse', False)
 hide_st_style = """
             <style>
             #MainMenu {visibility: hidden;}
-            footer {visibility: hidden; !important}
+            footer {visibility: hidden;}
             header {visibility: hidden;}
             </style>
             """
