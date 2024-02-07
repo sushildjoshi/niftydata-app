@@ -6,15 +6,7 @@ import seaborn as sns
 import numpy as np
 import yfinance as yf
 
-st.set_page_config(
-   page_title="Nifty500",
-   #page_icon="🧊",
-   #page_icon="""st.image("nifty50.svg")""",
-   page_icon=None,
-   layout="wide",
-   initial_sidebar_state="expanded",
-   menu_items=None
-)
+
 
 hide_st_style = """
             <style>
