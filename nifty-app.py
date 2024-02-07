@@ -16,11 +16,6 @@ st.set_page_config(
    menu_items=None
 )
 
-st.title('Nifty 500 App')
-st.set_option('deprecation.showPyplotGlobalUse', False)
-
-
-
 hide_st_style = """
             <style>
             #MainMenu {visibility: hidden;}
@@ -29,6 +24,13 @@ hide_st_style = """
             </style>
             """
 st.markdown(hide_st_style, unsafe_allow_html=True)
+
+
+st.title('Nifty 500 App')
+st.set_option('deprecation.showPyplotGlobalUse', False)
+
+
+
 
 st.markdown("""
 This app retrieves the list of the **nifty 500** (from Wikipedia) and its corresponding **stock closing price** (year-to-date)!
