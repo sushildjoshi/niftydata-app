@@ -9,7 +9,7 @@ if 'counter' not in st.session_state:
 
 # Using a sidebar for input
 with st.sidebar:
-    st.write("This is a sidebar.")
+    st.write("**This is a sidebar**")
     sidebar_selectbox = st.selectbox("Choose a number:", [1, 2, 3, 4, 5])
     # Increment counter button in sidebar
     if st.button('Increment Counter'):
@@ -20,6 +20,7 @@ st.write(f"**:green[You selected option {sidebar_selectbox} in the sidebar.]**")
 st.write(f"Counter value: {st.session_state.counter}")
 
 # Columns for horizontal layout
+st.write("**Columns for horizontal layout**")
 col1, col2, col3 = st.columns(3)
 with col1:
     st.header("Column 1")
@@ -42,6 +43,7 @@ with col3:
         st.write("Checkbox in Column 3 is checked.")
 
 # Expander for optional information
+st.write("**Expander for optional information**")
 with st.expander("See explanation"):
     st.write("""
         This is an expander. You can use it to hide optional or additional information
@@ -50,6 +52,7 @@ with st.expander("See explanation"):
     """)
 
 # Containers for organizing content
+st.write("**Containers for organizing content**")
 with st.container():
     st.write("This is a container.")
     st.write("You can place any Streamlit widget inside a container.")
@@ -58,6 +61,7 @@ with st.container():
     st.write(f"Slider in container value: {container_slider}")
 
 # Using tabs for organized content
+st.write("**Using tabs for organized content**")
 tab1, tab2 = st.tabs(["First Tab", "Second Tab"])
 with tab1:
     st.header("This is the first tab")
