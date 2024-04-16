@@ -3,17 +3,22 @@ import streamlit as st
 # Title of the app
 st.title("Streamlit Layouts & Containers Demo")
 
-# Session state for a counter
+# Initialize the session state counter if not already set
 if 'counter' not in st.session_state:
     st.session_state.counter = 0
+
+# Function to increment the counter
+def increment_counter():
+    st.session_state.counter += 1
+    
 
 # Using a sidebar for input
 with st.sidebar:
     st.write("**This is a sidebar**")
     sidebar_selectbox = st.selectbox("Choose a number:", [1, 2, 3, 4, 5])
     # Increment counter button in sidebar
-    if st.button('Increment Counter'):
-        st.session_state.counter += 1
+    if st.button('Increment Counter', key='sidebar_increment'):
+        increment_counter()
 
 # Displaying chosen sidebar option and the counter in the main area
 st.write(f"**:green[You selected option {sidebar_selectbox} in the sidebar.]**")
@@ -25,9 +30,9 @@ col1, col2, col3 = st.columns(3)
 with col1:
     st.header("Column 1")
     st.write("This is the first column. You can add any Streamlit widget here.")
-    col1_button = st.button("Click me 1")
+    col1_button = st.button("Click me 1", key='col1_button')
     if col1_button:
-        st.session_state.counter += 1  # Increment counter on button click
+        increment_counter()  # Increment counter on button click
         st.write("Button in Column 1 clicked.")
 
 with col2:
