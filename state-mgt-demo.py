@@ -24,7 +24,7 @@ with col1:
         increment_counter()
 
 with col2:
-    decrement = st.button('Decrement Counter')
+    decrement = st.button(':green[Decrement Counter]')
     if decrement:
         decrement_counter()
 
