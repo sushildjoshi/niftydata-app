@@ -19,7 +19,7 @@ def decrement_counter():
 col1, col2 = st.columns(2)  # Using columns to organize buttons
 
 with col1:
-    increment = st.button('Increment Counter')
+    increment = st.button(':red[Increment Counter]')
     if increment:
         increment_counter()
 
