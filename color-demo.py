@@ -2,6 +2,7 @@ import streamlit as st
 
 # Title of the app
 st.title('Webpage Color Design Tool')
+st.write('this is demo page')
 
 # Sidebar for color selection
 st.sidebar.header("Color Settings")

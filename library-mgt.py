@@ -32,7 +32,7 @@ def delete_book(code):
 # Streamlit UI
 st.title('Library Management System')
 
-st.header('Add New Book')
+st.header(':blue[Add New Book]')
 with st.expander("**:red[Please fill this form]**"):
     with st.form("Add book form", clear_on_submit=True):
         book_name = st.text_input('Book Name')
