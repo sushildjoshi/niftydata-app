@@ -14,15 +14,17 @@ st.set_page_config(
       
 )
 
-def create_prompt(myquestion, rag,stage):
-    # Determine the stage-specific table
-    #table_map = {
-     #   'Marketing Knowledge Base': '@history_docs',
-      #  'Sales Knowledge Base': '@docs',
-       # 'HR Knowledge Base': '@docs'  # Assuming HR uses the same as Sales for this example
-    #}
-    #stage_table = table_map.get(stage, '@docs')  # Default to @docs if no specific stage match
-    #stage_table = table_map[stage]
+def create_prompt(myquestion, rag,stage,selected_doc):
+
+       # Known prefixes that might need to be removed
+    known_prefixes = ['docs/', 'history_docs/']
+
+    # Dynamically remove any known prefix from selected_doc
+    for prefix in known_prefixes:
+        if selected_doc.startswith(prefix):
+            selected_doc = selected_doc[len(prefix):]  # Strip the prefix
+            break  # Exit the loop once the prefix is stripped
+
     stage_table = '@history_docs' if stage == 'Marketing Knowledge Base' else '@docs'
     if rag:
         cmd = f"""
@@ -30,12 +32,15 @@ def create_prompt(myquestion, rag,stage):
             SELECT RELATIVE_PATH, VECTOR_COSINE_SIMILARITY(docs_chunks_table.chunk_vec,
                     snowflake.cortex.embed_text_768('e5-base-v2', ?)) AS distance, chunk
             FROM docs_chunks_table
+            where RELATIVE_PATH = ?
             ORDER BY distance DESC
-            LIMIT ?
+            LIMIT {num_chunks}
         )
         SELECT chunk, relative_path FROM results
         """
-        df_context = session.sql(cmd, params=[myquestion, num_chunks]).to_pandas()
+        #where ltrim('{stage_table},RELATIVE_PATH','@') = ?
+        
+        df_context = session.sql(cmd, params=[myquestion,selected_doc]).to_pandas()
         context_length = len(df_context) - 1
         prompt_context = "".join(df_context.loc[:context_length, 'CHUNK'])
         prompt_context = prompt_context.replace("'", "")
@@ -58,8 +63,8 @@ def create_prompt(myquestion, rag,stage):
         relative_path = "None"
     return prompt, url_link, relative_path
 
-def complete(myquestion, model_name, rag,stage):
-    prompt, url_link, relative_path = create_prompt(myquestion, rag,stage)
+def complete(myquestion, model_name, rag,stage,selected_doc):
+    prompt, url_link, relative_path = create_prompt(myquestion, rag,stage,selected_doc)
     cmd = f"SELECT snowflake.cortex.complete(?,?) AS response"
     df_response = session.sql(cmd, params=[model_name, prompt]).collect()
     return df_response, url_link, relative_path
@@ -115,13 +120,15 @@ if st.button(':red[Submit]'):
     actual_question = prompt if prompt else question
     if actual_question:
         st.session_state['actual_question'] = actual_question
+        st.session_state['stage'] = stage
+        st.session_state['selected_doc'] = selected_doc
         st.session_state['submitted'] = True
 
 if 'submitted' in st.session_state:
     col1, thumb_col, col2 = st.columns([3.5, 1, 3.5])
     with col1:
         st.header("Vanilla Response from LLM")
-        response, _, _ = complete(st.session_state['actual_question'], model, 0,stage)
+        response, _, _ = complete(st.session_state['actual_question'], model, 0,st.session_state['stage'], st.session_state['selected_doc'])
         st.markdown(response[0].RESPONSE)
     with thumb_col:
         st.header("Rate")  # Header for the thumbs-up column
@@ -131,7 +138,7 @@ if 'submitted' in st.session_state:
             st.snow()  # Simple interaction: balloons appear on click
     with col2:
         st.header("RAG powered Response from LLM")
-        response, url_link, relative_path = complete(st.session_state['actual_question'], model, 1,stage)
+        response, url_link, relative_path = complete(st.session_state['actual_question'], model, 1,st.session_state['stage'], st.session_state['selected_doc'])
         st.markdown(response[0].RESPONSE)
         if url_link != "None":
             display_url = f"Link to [{relative_path}]({url_link}) that may be useful"
