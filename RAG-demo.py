@@ -14,9 +14,18 @@ st.set_page_config(
       
 )
 
-def create_prompt(myquestion, rag):
+def create_prompt(myquestion, rag,stage):
+    # Determine the stage-specific table
+    #table_map = {
+     #   'Marketing Knowledge Base': '@history_docs',
+      #  'Sales Knowledge Base': '@docs',
+       # 'HR Knowledge Base': '@docs'  # Assuming HR uses the same as Sales for this example
+    #}
+    #stage_table = table_map.get(stage, '@docs')  # Default to @docs if no specific stage match
+    #stage_table = table_map[stage]
+    stage_table = '@history_docs' if stage == 'Marketing Knowledge Base' else '@docs'
     if rag:
-        cmd = """
+        cmd = f"""
         WITH results AS (
             SELECT RELATIVE_PATH, VECTOR_COSINE_SIMILARITY(docs_chunks_table.chunk_vec,
                     snowflake.cortex.embed_text_768('e5-base-v2', ?)) AS distance, chunk
@@ -40,7 +49,7 @@ def create_prompt(myquestion, rag):
         {myquestion}
         Answer: '
         """
-        cmd2 = f"SELECT GET_PRESIGNED_URL(@docs, '{relative_path}', 360) AS URL_LINK FROM directory(@docs)"
+        cmd2 = f"SELECT GET_PRESIGNED_URL({stage_table}, '{relative_path}', 360) AS URL_LINK FROM directory({stage_table})"
         df_url_link = session.sql(cmd2).to_pandas()
         url_link = df_url_link.loc[0, 'URL_LINK'] if not df_url_link.empty else "URL not available"
     else:
@@ -49,8 +58,8 @@ def create_prompt(myquestion, rag):
         relative_path = "None"
     return prompt, url_link, relative_path
 
-def complete(myquestion, model_name, rag=1):
-    prompt, url_link, relative_path = create_prompt(myquestion, rag)
+def complete(myquestion, model_name, rag,stage):
+    prompt, url_link, relative_path = create_prompt(myquestion, rag,stage)
     cmd = f"SELECT snowflake.cortex.complete(?,?) AS response"
     df_response = session.sql(cmd, params=[model_name, prompt]).collect()
     return df_response, url_link, relative_path
@@ -81,8 +90,9 @@ with tab1:
                                            'Sales Knowledge Base',
                                            'HR Knowledge Base'
                                     ))
-    docs_available = session.sql("ls @docs").collect()
-    list_docs = [doc["name"] for doc in docs_available]
+        stage_table = '@history_docs' if stage == 'Marketing Knowledge Base' else '@docs'
+        docs_available = session.sql(f"ls {stage_table}").collect()
+        list_docs = [doc["name"] for doc in docs_available]
 
     col33, thumb_col = st.columns([0.45, 1.5])
     with col33:
@@ -101,7 +111,7 @@ with tab1:
     with col55:
         question = st.text_input("Or Enter Your Own Prompt")
        
-if st.button('Submit'):
+if st.button(':red[Submit]'):
     actual_question = prompt if prompt else question
     if actual_question:
         st.session_state['actual_question'] = actual_question
@@ -111,7 +121,7 @@ if 'submitted' in st.session_state:
     col1, thumb_col, col2 = st.columns([3.5, 1, 3.5])
     with col1:
         st.header("Vanilla Response from LLM")
-        response, _, _ = complete(st.session_state['actual_question'], model, rag=0)
+        response, _, _ = complete(st.session_state['actual_question'], model, 0,stage)
         st.markdown(response[0].RESPONSE)
     with thumb_col:
         st.header("Rate")  # Header for the thumbs-up column
@@ -121,7 +131,7 @@ if 'submitted' in st.session_state:
             st.snow()  # Simple interaction: balloons appear on click
     with col2:
         st.header("RAG powered Response from LLM")
-        response, url_link, relative_path = complete(st.session_state['actual_question'], model, rag=1)
+        response, url_link, relative_path = complete(st.session_state['actual_question'], model, 1,stage)
         st.markdown(response[0].RESPONSE)
         if url_link != "None":
             display_url = f"Link to [{relative_path}]({url_link}) that may be useful"
